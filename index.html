@@ -34,6 +34,7 @@ const FRUIT_SPAWN = { x:10, y:13 };
 const STEP = 1/120;
 const MAX_PARTICLES = 260;
 const HI_KEY = 'neonMuncherHighScore';
+const EXTRA_LIFE_EVERY = 10000;
 const FONT = 'system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
 const GHOST_DEFS = [
@@ -193,7 +194,7 @@ function bfsFrom(sx,sy){
    ============================================================ */
 let maze = null, eyesDist = null, hue = 200;
 let state = 'title', stateTimer = 0, time = 0;
-let score = 0, hi = loadHi(), lives = 3, level = 1, extraGiven = false, newHi = false;
+let score = 0, hi = loadHi(), lives = 3, level = 1, nextExtraAt = EXTRA_LIFE_EVERY, newHi = false;
 let totalPellets = 0, pelletsLeft = 0, pelletsEaten = 0, fruitSpawns = 0;
 let pac = null, ghosts = [], fruit = null;
 let powerTime = 0, powerMax = 0, ghostChain = 0;
@@ -214,7 +215,7 @@ const elroy      = () => pelletsLeft <= Math.max(12, totalPellets*0.12);
 function setState(s){ state = s; stateTimer = 0; }
 
 function startGame(){
-  score = 0; lives = 3; level = 1; extraGiven = false; newHi = false;
+  score = 0; lives = 3; level = 1; nextExtraAt = EXTRA_LIFE_EVERY; newHi = false;
   newLevel();
   setState('playing');
 }
@@ -250,8 +251,8 @@ function resetRound(){
 function addScore(n){
   score += n;
   if (score > hi){ hi = score; newHi = true; }
-  if (!extraGiven && score >= 10000){
-    extraGiven = true; lives++;
+  while (score >= nextExtraAt){
+    nextExtraAt += EXTRA_LIFE_EVERY; lives++;
     addText(pac.x, pac.y-1, '1UP!', '#7dff6a', 1.4);
     sfx('extra');
   }
@@ -1013,7 +1014,7 @@ function drawInstructions(y0, size){
     ['#fff4c2','PELLET 10 (combo up to x5)'],
     ['#ff7de9','POWER ORB 50  •  ghosts turn blue'],
     ['#2ef2ff','GHOSTS 200 → 400 → 800 → 1600'],
-    ['#7dff6a','FRUIT 500'],
+    ['#7dff6a','FRUIT 500  •  EXTRA LIFE every 10,000'],
   ];
   let y = y0;
   const colX = W/2;
